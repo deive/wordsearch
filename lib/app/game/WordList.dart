@@ -2,7 +2,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../App.dart';
 import '../Model.dart';
@@ -18,31 +17,33 @@ class WordListWidget extends StatelessWidget {
     var mq = MediaQuery.of(context);
     var height = App.getScreenViewHeight(mq);
     var textHeight = height / 10;
-    const itemPadding = EdgeInsets.only(top: 10, bottom: 10);
+
     if (mq.size.width > height) {
-      return ListView(
-        children: viewModel.words.map((e) =>
-          Container(padding: itemPadding, child: buildWord(e))
-        ).toList(),
+      return Column(
+        children: viewModel.words.map((e) => Expanded(child: buildWord(e))).toList(growable: false),
       );
     }
     else {
-      return StaggeredGridView.count(
-        crossAxisCount: 2,
-        staggeredTiles: viewModel.words.map((e) => StaggeredTile.fit(1)).toList(growable: false),
-        children: viewModel.words.map((e) =>
-            Container(height: textHeight, padding: itemPadding, child: buildWord(e),)
-        ).toList(),
+      var wordEntries = viewModel.words.asMap().entries;
+      return Row(
+        children: [
+          Expanded(child: Column(
+            children: wordEntries.where((e) => e.key.isEven).map((e) => Expanded(child: buildWord(e.value))).toList(growable: false),
+          ),),
+          Expanded(child: Column(
+            children: wordEntries.where((e) => e.key.isEven).map((e) => Expanded(child: buildWord(e.value))).toList(growable: false),
+          ),)
+        ],
       );
     }
   }
 
-  Widget buildWord(GameWord word) => AutoSizeText(
+  Widget buildWord(GameWord word) => Center(child: AutoSizeText(
     word.word,
     style: TextStyle(fontSize: 50),
     textAlign: TextAlign.center,
     maxLines: 1,
-  );
+  ));
 }
 
 class _ViewModel {

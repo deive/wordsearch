@@ -1,14 +1,32 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
 
 import 'App.dart';
+import 'AppState.dart';
+import 'game/GameState.dart';
 import 'game/GamePage.dart';
 import 'settings/SettingsPage.dart';
 
 class MainPage extends StatelessWidget {
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => StoreConnector<AppState, _ViewModel>(
+      distinct: true,
+      converter: (Store<AppState> store) => _ViewModel.create(store),
+      builder: (BuildContext context, _ViewModel viewModel) => _build(context, viewModel)
+  );
+
+  Widget _build(BuildContext context, _ViewModel viewModel) {
+    if (viewModel.state == GameStateEnum.Loading)
+      return Center(child: CircularProgressIndicator());
+    else
+      return _buildScaffold(context);
+  }
+
+  Widget _buildScaffold(BuildContext context) {
     List<Widget> _tabs = [
       GamePage(), // see the FrontPage class
       SettingsPage() // see the SettingsPage class
@@ -63,4 +81,10 @@ class MainPage extends StatelessWidget {
     }
     return null;
   }
+}
+
+class _ViewModel {
+  GameStateEnum state;
+  _ViewModel(this.state);
+  factory _ViewModel.create(Store<AppState> store) => _ViewModel(store.state.game.state);
 }

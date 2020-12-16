@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../App.dart';
-import '../Model.dart';
+import 'GameState.dart';
 
 class WordSearchCell extends StatefulWidget {
   WordSearchCell({Key key, this.size, this.cell}) : super(key: key);

@@ -1,8 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
-import '../Model.dart';
 
+import '../AppState.dart';
+import 'GameState.dart';
 import 'WordSearchCell.dart';
 
 class WordSearchWidget extends StatelessWidget {
@@ -10,6 +11,7 @@ class WordSearchWidget extends StatelessWidget {
   final double _cellSize;
   @override
   Widget build(BuildContext context) => StoreConnector<AppState, _ViewModel>(
+      distinct: true,
       converter: (Store<AppState> store) => _ViewModel.create(store),
       builder: (BuildContext context, _ViewModel viewModel) => Row(
           children: viewModel.cells.map((e) => Expanded(child: Column(
@@ -25,5 +27,5 @@ class WordSearchWidget extends StatelessWidget {
 class _ViewModel {
   List<List<WordCell>> cells;
   _ViewModel(this.cells);
-  factory _ViewModel.create(Store<AppState> store) => _ViewModel(store.state.cells);
+  factory _ViewModel.create(Store<AppState> store) => _ViewModel(store.state.game.cells);
 }

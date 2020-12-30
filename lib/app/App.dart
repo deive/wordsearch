@@ -41,6 +41,7 @@ class App extends StatelessWidget {
 
   static bool showToolbar = !kIsWeb && (Platform.isIOS || Platform.isAndroid);
   static bool isCupertino = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
+  static bool hasDarkTheme = !kIsWeb && (Platform.isIOS || Platform.isAndroid || Platform.isMacOS);
 
   static List<String> pickRandomWords(int numWords) {
     List<String> picked = [];
@@ -78,19 +79,27 @@ class App extends StatelessWidget {
     else {
       return MaterialApp(
         title: title,
-        darkTheme: ThemeData(
-          brightness: Brightness.light,
-          primaryColor: primaryColorLight,
-          sliderTheme: SliderThemeData(activeTrackColor: primaryColorLight, thumbColor: primaryColorLight, inactiveTrackColor: primaryColorDark),
-          checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith((states) => primaryColorLight)),
-        ),
-        theme: ThemeData(
-          brightness: Brightness.dark,
-          primaryColor: primaryColorDark,
-          sliderTheme: SliderThemeData(activeTrackColor: primaryColorDark, thumbColor: primaryColorDark, inactiveTrackColor: primaryColorLight),
-          checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith((states) => primaryColorDark)),
-        ),
+        theme: _ThemeMaterialData(!hasDarkTheme, primaryColorLight, primaryColorDark),
+        darkTheme: _ThemeMaterialData(true, primaryColorLight, primaryColorDark),
         home: home,
+      );
+    }
+  }
+
+  ThemeData _ThemeMaterialData(bool dark, Color primaryColorLight, Color primaryColorDark) {
+    if (dark) {
+      return ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: primaryColorDark,
+        sliderTheme: SliderThemeData(activeTrackColor: primaryColorDark, thumbColor: primaryColorDark, inactiveTrackColor: primaryColorLight),
+        checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith((states) => primaryColorDark)),
+      );
+    } else {
+      return ThemeData(
+        brightness: Brightness.light,
+        primaryColor: primaryColorLight,
+        sliderTheme: SliderThemeData(activeTrackColor: primaryColorLight, thumbColor: primaryColorLight, inactiveTrackColor: primaryColorDark),
+        checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith((states) => primaryColorLight)),
       );
     }
   }

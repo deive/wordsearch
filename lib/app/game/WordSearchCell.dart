@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../App.dart';
 import 'GameState.dart';
 
 class WordSearchCell extends StatefulWidget {
@@ -19,9 +19,11 @@ class _WordCellState extends State<WordSearchCell> {
   Widget build(BuildContext context) {
     return Container(
       constraints: BoxConstraints.expand(),
-      decoration: new BoxDecoration(color: App.primaryColour, border: Border.all()),
+      decoration: new BoxDecoration(border: Border.all(color: Theme.of(context).primaryColor)),
       padding: EdgeInsets.all(widget.size / 10),
-      child: FittedBox(child: Text(widget.cell.letter)),
+      child: FittedBox(
+          child: Text(widget.cell.letter,
+            style: TextStyle(color: Theme.of(context).primaryColor))),
     );
   }
 }

@@ -61,7 +61,9 @@ class MainPage extends StatelessWidget {
                 tabs: [
                   Tab(icon: Icon(Icons.subject)),
                   Tab(icon: Icon(Icons.settings)),
-                ]
+                ],
+              labelColor: Theme.of(context).primaryColor,
+              indicatorColor: Theme.of(context).primaryColor,
             ),
           )
       );

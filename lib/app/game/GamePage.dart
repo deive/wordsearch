@@ -18,16 +18,16 @@ class GamePage extends StatelessWidget {
           var wordList = Expanded(child: WordListWidget(), flex: 1);
           var wordSearch = Expanded(child: WordSearchWidget(size), flex: 2);
           if (mq.size.width > height) {
-            return Container(color: App.secondaryColour, child: Row(
+            return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [wordList, wordSearch],
-            ));
+            );
           }
           else {
-            return Container(color: App.secondaryColour, child: Column(
+            return Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [wordSearch, wordList],
-            ));
+            );
           }
         }
     );

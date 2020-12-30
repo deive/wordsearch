@@ -16,8 +16,6 @@ import 'AppState.dart';
 class App extends StatelessWidget {
 
   static const String title = "wordsearch";
-  static const Color primaryColour = Color.fromARGB(255, 255, 0, 0);
-  static const Color secondaryColour = Color.fromARGB(255, 0, 0, 255);
 
   static final _random = new Random();
   static List<String> allWords;
@@ -59,16 +57,19 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) => StoreProvider(
     store: store,
-    child: _buildApp(),
+    child: _buildApp(context),
   );
 
-  Widget _buildApp() {
+  Widget _buildApp(BuildContext context) {
     var home = MainPage();
+    var primaryColorLight = Colors.blue[800];
+    var primaryColorDark = Colors.lightBlue[600];
+    var secondaryColour = Color.fromARGB(255, 255, 0, 0);
     if (isCupertino) {
       return CupertinoApp(
         title: title,
         theme: CupertinoThemeData(
-          primaryColor: primaryColour,
+          primaryColor: primaryColorLight,
           primaryContrastingColor: secondaryColour,
         ),
         home: home,
@@ -77,9 +78,17 @@ class App extends StatelessWidget {
     else {
       return MaterialApp(
         title: title,
+        darkTheme: ThemeData(
+          brightness: Brightness.light,
+          primaryColor: primaryColorLight,
+          sliderTheme: SliderThemeData(activeTrackColor: primaryColorLight, thumbColor: primaryColorLight, inactiveTrackColor: primaryColorDark),
+          checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith((states) => primaryColorLight)),
+        ),
         theme: ThemeData(
-          primarySwatch: Colors.red,
-          accentColor: secondaryColour,
+          brightness: Brightness.dark,
+          primaryColor: primaryColorDark,
+          sliderTheme: SliderThemeData(activeTrackColor: primaryColorDark, thumbColor: primaryColorDark, inactiveTrackColor: primaryColorLight),
+          checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith((states) => primaryColorDark)),
         ),
         home: home,
       );

@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
@@ -21,7 +22,7 @@ class WordListWidget extends StatelessWidget {
 
     if (mq.size.width > height) {
       return Column(
-        children: viewModel.words.map((e) => Expanded(child: buildWord(e))).toList(growable: false),
+        children: viewModel.words.map((e) => Expanded(child: buildWord(context, e))).toList(growable: false),
       );
     }
     else {
@@ -29,19 +30,19 @@ class WordListWidget extends StatelessWidget {
       return Row(
         children: [
           Expanded(child: Column(
-            children: wordEntries.where((e) => e.key.isEven).map((e) => Expanded(child: buildWord(e.value))).toList(growable: false),
+            children: wordEntries.where((e) => e.key.isEven).map((e) => Expanded(child: buildWord(context, e.value))).toList(growable: false),
           ),),
           Expanded(child: Column(
-            children: wordEntries.where((e) => e.key.isEven).map((e) => Expanded(child: buildWord(e.value))).toList(growable: false),
+            children: wordEntries.where((e) => e.key.isEven).map((e) => Expanded(child: buildWord(context, e.value))).toList(growable: false),
           ),)
         ],
       );
     }
   }
 
-  Widget buildWord(GameWord word) => Center(child: AutoSizeText(
+  Widget buildWord(BuildContext context, GameWord word) => Center(child: AutoSizeText(
     word.word,
-    style: TextStyle(fontSize: 50),
+    style: TextStyle(fontSize: 50, color: Theme.of(context).primaryColor),
     textAlign: TextAlign.center,
     maxLines: 1,
   ));

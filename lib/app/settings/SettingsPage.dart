@@ -50,7 +50,7 @@ class SettingsPage extends StatelessWidget {
   Widget _forWord(BuildContext context, String title, bool value, Function onChanged) {
     var view;
     if (App.isCupertino) {
-      view = CupertinoSwitch(value: value, onChanged: onChanged);
+      view = CupertinoSwitch(value: value, onChanged: onChanged, activeColor: Theme.of(context).primaryColor);
     } else {
       view = Checkbox(value: value, onChanged: onChanged);
     }
@@ -60,7 +60,7 @@ class SettingsPage extends StatelessWidget {
   Widget _forSize(BuildContext context, String title, int value, int min, int max, Function onChanged) {
     var view;
     if (App.isCupertino) {
-      view = CupertinoSlider(value: value.toDouble(), min: min.toDouble(), max: max.toDouble(), onChanged: (double newValue) => onChanged(newValue.toInt()));
+      view = CupertinoSlider(value: value.toDouble(), min: min.toDouble(), max: max.toDouble(), onChanged: (double newValue) => onChanged(newValue.toInt()), );
     } else {
       view = Slider(value: value.toDouble(), min: min.toDouble(), max: max.toDouble(), onChanged: (double newValue) => onChanged(newValue.toInt()));
     }

@@ -21,6 +21,11 @@ class App extends StatelessWidget {
   static List<String> allWords;
   static WordSearch wordSearch;
 
+  static Color _lightThemePrimaryColor = Colors.blue[800];
+  static Color _lightThemeAccentColorColor = Colors.lightBlue[400];
+  static Color _darkThemePrimaryColor = Colors.lightBlue[600];
+  static Color _darkThemeAccentColorColor = Colors.blue[900];
+
   final Store<AppState> store = Store<AppState>(
     appReducer, /* Function defined in the reducers file */
     initialState: AppState.initial(),
@@ -41,7 +46,7 @@ class App extends StatelessWidget {
 
   static bool showToolbar = !kIsWeb && (Platform.isIOS || Platform.isAndroid);
   static bool isCupertino = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
-  static bool hasDarkTheme = !kIsWeb && (Platform.isIOS || Platform.isAndroid || Platform.isMacOS);
+  static bool hasDarkTheme = !kIsWeb && Platform.isAndroid;
 
   static List<String> pickRandomWords(int numWords) {
     List<String> picked = [];
@@ -63,43 +68,48 @@ class App extends StatelessWidget {
 
   Widget _buildApp(BuildContext context) {
     var home = MainPage();
-    var primaryColorLight = Colors.blue[800];
-    var primaryColorDark = Colors.lightBlue[600];
-    var secondaryColour = Color.fromARGB(255, 255, 0, 0);
     if (isCupertino) {
-      return CupertinoApp(
-        title: title,
-        theme: CupertinoThemeData(
-          primaryColor: primaryColorLight,
-          primaryContrastingColor: secondaryColour,
-        ),
-        home: home,
+      return Theme(
+          data: ThemeData(
+            brightness: Brightness.dark,
+            primaryColor: _darkThemePrimaryColor,
+            accentColor: _darkThemeAccentColorColor,
+          ), 
+          child: CupertinoApp(
+            title: title,
+            theme: CupertinoThemeData(
+              brightness: Brightness.dark,
+              primaryColor: _darkThemePrimaryColor,
+              primaryContrastingColor: _darkThemeAccentColorColor
+            ),
+            home: home,
+          )
       );
     }
     else {
       return MaterialApp(
         title: title,
-        theme: _ThemeMaterialData(!hasDarkTheme, primaryColorLight, primaryColorDark),
-        darkTheme: _ThemeMaterialData(true, primaryColorLight, primaryColorDark),
+        theme: _ThemeMaterialData(!hasDarkTheme),
+        darkTheme: _ThemeMaterialData(true),
         home: home,
       );
     }
   }
 
-  ThemeData _ThemeMaterialData(bool dark, Color primaryColorLight, Color primaryColorDark) {
+  ThemeData _ThemeMaterialData(bool dark) {
     if (dark) {
       return ThemeData(
         brightness: Brightness.dark,
-        primaryColor: primaryColorDark,
-        sliderTheme: SliderThemeData(activeTrackColor: primaryColorDark, thumbColor: primaryColorDark, inactiveTrackColor: primaryColorLight),
-        checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith((states) => primaryColorDark)),
+        primaryColor: _darkThemePrimaryColor,
+        sliderTheme: SliderThemeData(activeTrackColor: _darkThemePrimaryColor, thumbColor: _darkThemePrimaryColor, inactiveTrackColor: _darkThemeAccentColorColor),
+        checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith((states) => _darkThemePrimaryColor)),
       );
     } else {
       return ThemeData(
         brightness: Brightness.light,
-        primaryColor: primaryColorLight,
-        sliderTheme: SliderThemeData(activeTrackColor: primaryColorLight, thumbColor: primaryColorLight, inactiveTrackColor: primaryColorDark),
-        checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith((states) => primaryColorLight)),
+        primaryColor: _lightThemePrimaryColor,
+        sliderTheme: SliderThemeData(activeTrackColor: _lightThemePrimaryColor, thumbColor: _lightThemePrimaryColor, inactiveTrackColor: _lightThemeAccentColorColor),
+        checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith((states) => _lightThemePrimaryColor)),
       );
     }
   }

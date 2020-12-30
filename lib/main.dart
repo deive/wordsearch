@@ -13,6 +13,7 @@ void main() async {
   final persistor = Persistor<AppState>(
     storage: FlutterStorage(location: FlutterSaveLocation.sharedPreferences),
     serializer: JsonSerializer<AppState>(AppState.fromJson),
+    throttleDuration: Duration(seconds: 2),
   );
 
   final initialState = await persistor.load();

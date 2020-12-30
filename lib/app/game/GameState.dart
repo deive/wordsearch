@@ -47,7 +47,6 @@ void loadGameMiddleware(Store<AppState> store, action, NextDispatcher next) {
 }
 
 GameState gameReducer(GameState state, action) {
-  // if (action is LoadGameAction) return loadGameReducer(state, action);
   if (action is NewGameAction) return newGameReducer(state, action);
   else return state;
 }

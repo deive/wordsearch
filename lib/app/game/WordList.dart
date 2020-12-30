@@ -33,7 +33,7 @@ class WordListWidget extends StatelessWidget {
             children: wordEntries.where((e) => e.key.isEven).map((e) => Expanded(child: buildWord(context, e.value))).toList(growable: false),
           ),),
           Expanded(child: Column(
-            children: wordEntries.where((e) => e.key.isEven).map((e) => Expanded(child: buildWord(context, e.value))).toList(growable: false),
+            children: wordEntries.where((e) => e.key.isOdd).map((e) => Expanded(child: buildWord(context, e.value))).toList(growable: false),
           ),)
         ],
       );

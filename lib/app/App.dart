@@ -8,10 +8,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 import 'package:word_search/word_search.dart';
-import 'package:wordsearch/app/game/GameState.dart';
 
-import 'MainPage.dart';
 import 'AppState.dart';
+import 'MainPage.dart';
+import 'game/GameState.dart';
 
 class App extends StatelessWidget {
 
@@ -25,12 +25,6 @@ class App extends StatelessWidget {
   static Color _lightThemeAccentColorColor = Colors.lightBlue[400];
   static Color _darkThemePrimaryColor = Colors.lightBlue[600];
   static Color _darkThemeAccentColorColor = Colors.blue[900];
-
-  final Store<AppState> store = Store<AppState>(
-    appReducer, /* Function defined in the reducers file */
-    initialState: AppState.initial(),
-    middleware: [loadGameMiddleware],
-  );
 
   static double getScreenViewHeight(MediaQueryData mq) {
     var viewHeight = mq.size.height - mq.padding.top;
@@ -56,13 +50,15 @@ class App extends StatelessWidget {
     return picked;
   }
 
-  App() {
-    store.dispatch(LoadGameAction());
+  final Store<AppState> _store;
+
+  App(this._store) {
+    _store.dispatch(LoadGameAction());
   }
 
   @override
   Widget build(BuildContext context) => StoreProvider(
-    store: store,
+    store: _store,
     child: _buildApp(context),
   );
 

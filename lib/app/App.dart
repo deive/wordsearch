@@ -42,10 +42,15 @@ class App extends StatelessWidget {
   static bool isCupertino = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
   static bool hasDarkTheme = !kIsWeb && Platform.isAndroid;
 
-  static List<String> pickRandomWords(int numWords) {
+  static List<String> pickRandomWords(int numWords, int maxSize) {
     List<String> picked = [];
-    for (var i = 0; i < numWords; i++) {
-      picked.add(allWords[_random.nextInt(allWords.length)]);
+    var i = 0;
+    while (i < numWords) {
+      var word = allWords[_random.nextInt(allWords.length)];
+      if (word.length <= maxSize) {
+        picked.add(word);
+        i++;
+      }
     }
     return picked;
   }

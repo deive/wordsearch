@@ -11,7 +11,7 @@ class SettingsState {
     wordSettings = _createSettings();
   }
 
-  factory SettingsState.initial() => SettingsState(10, true, true, true, 8);
+  factory SettingsState.initial() => SettingsState(9, true, true, true, 8);
 
   SettingsState copyWith({ int size, bool wordsHorizontal, bool wordsVertical, bool wordsDiagonal, int numWords }) {
     return SettingsState(

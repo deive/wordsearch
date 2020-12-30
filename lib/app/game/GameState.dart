@@ -52,7 +52,7 @@ GameState gameReducer(GameState state, action) {
 }
 
 GameState newGameReducer(GameState state, NewGameAction action) {
-  var words = App.pickRandomWords(action.settings.numWords).map((e) => GameWord(e, false)).toList(growable: false);
+  var words = App.pickRandomWords(action.settings.numWords, action.settings.size).map((e) => GameWord(e, false)).toList(growable: false);
   var puzzle = App.wordSearch.newPuzzle(words.map((e) => e.word).toList(), action.settings.wordSettings);
   var cells = puzzle.puzzle.asMap().entries.map((entry) =>
       entry.value.asMap().entries.map((innerEntry) =>

@@ -41,11 +41,11 @@ class SettingsPage extends StatelessWidget {
     return list;
   }
 
-  Widget _forWordSearchSize(BuildContext context, _ViewModel viewModel) => _forSize(context, "Puzzle Size (${viewModel.settings.size} tiles)", viewModel.settings.size, 8, 15, viewModel.onUpdateSize);
+  Widget _forWordSearchSize(BuildContext context, _ViewModel viewModel) => _forSize(context, "Puzzle Size (${viewModel.settings.size} tiles)", viewModel.settings.size, 5, 17, 2, viewModel.onUpdateSize);
   Widget _forWordsHorizontal(BuildContext context, _ViewModel viewModel) => _forWord(context, "Horizontal", viewModel.settings.wordsHorizontal, viewModel.onUpdateWordsHorizontal);
   Widget _forWordsVertical(BuildContext context, _ViewModel viewModel) => _forWord(context, "Vertical", viewModel.settings.wordsVertical, viewModel.onUpdateWordsVertical);
   Widget _forWordsDiagonal(BuildContext context, _ViewModel viewModel) => _forWord(context, "Diagonal", viewModel.settings.wordsDiagonal, viewModel.onUpdateWordsDiagonal);
-  Widget _forNumWords(BuildContext context, _ViewModel viewModel) => _forSize(context, "Number of Words (${viewModel.settings.numWords})", viewModel.settings.numWords, 6, 12, viewModel.onUpdateNumWords);
+  Widget _forNumWords(BuildContext context, _ViewModel viewModel) => _forSize(context, "Number of Words (${viewModel.settings.numWords})", viewModel.settings.numWords, 6, 12, 1, viewModel.onUpdateNumWords);
 
   Widget _forWord(BuildContext context, String title, bool value, Function onChanged) {
     var view;
@@ -57,12 +57,12 @@ class SettingsPage extends StatelessWidget {
     return _settingsRow(context, title, view);
   }
 
-  Widget _forSize(BuildContext context, String title, int value, int min, int max, Function onChanged) {
+  Widget _forSize(BuildContext context, String title, int value, int min, int max, int step, Function onChanged) {
     var view;
     if (App.isCupertino) {
-      view = CupertinoSlider(value: value.toDouble(), min: min.toDouble(), max: max.toDouble(), onChanged: (double newValue) => onChanged(newValue.toInt()), );
+      view = CupertinoSlider(value: value.toDouble(), min: min.toDouble(), max: max.toDouble(), divisions: (max - min) ~/ step, onChanged: (double newValue) => onChanged(newValue.toInt()), );
     } else {
-      view = Slider(value: value.toDouble(), min: min.toDouble(), max: max.toDouble(), onChanged: (double newValue) => onChanged(newValue.toInt()));
+      view = Slider(value: value.toDouble(), min: min.toDouble(), max: max.toDouble(), divisions: (max - min) ~/ step, onChanged: (double newValue) => onChanged(newValue.toInt()));
     }
     return _settingsRow(context, title, view);
   }

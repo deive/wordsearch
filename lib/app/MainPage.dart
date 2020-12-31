@@ -38,8 +38,8 @@ class MainPage extends StatelessWidget {
         child: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             items: [
-              BottomNavigationBarItem(icon: Icon(Icons.subject)),
-              BottomNavigationBarItem(icon: Icon(Icons.settings)),
+              BottomNavigationBarItem(icon: Icon(CupertinoIcons.bars)),
+              BottomNavigationBarItem(icon: Icon(CupertinoIcons.settings)),
             ],
           ),
           tabBuilder: (context, index) => SafeArea(child: _tabs[index]),
@@ -52,6 +52,7 @@ class MainPage extends StatelessWidget {
           child: Scaffold(
             appBar: _materialToolbar(),
             body: TabBarView(
+              physics: NeverScrollableScrollPhysics(),
               children: [
                 _tabs[0],
                 _tabs[1]

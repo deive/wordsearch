@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -17,6 +18,20 @@ class WordListWidget extends StatelessWidget {
   );
 
   Widget _buildList(BuildContext context, _ViewModel viewModel) {
+    var wordList = _buildWordListList(context, viewModel);
+    return Stack(
+      alignment: Alignment.bottomLeft,
+      children: [
+        wordList,
+        if (App.isCupertino)
+          CupertinoButton(child: Icon(CupertinoIcons.restart), onPressed: viewModel.onRestartGame)
+        else
+          IconButton(icon: Icon(Icons.refresh), onPressed: viewModel.onRestartGame)
+      ],
+    );
+  }
+
+  Widget _buildWordListList(BuildContext context, _ViewModel viewModel) {
     var mq = MediaQuery.of(context);
     var height = App.getScreenViewHeight(mq);
 
@@ -50,6 +65,10 @@ class WordListWidget extends StatelessWidget {
 
 class _ViewModel {
   List<GameWord> words;
-  _ViewModel(this.words);
-  factory _ViewModel.create(Store<AppState> store) => _ViewModel(store.state.game.words);
+  final Function onRestartGame;
+  _ViewModel(this.words, this.onRestartGame);
+  factory _ViewModel.create(Store<AppState> store) => _ViewModel(
+      store.state.game.words,
+      () => store.dispatch(NewGameAction(store.state.settings))
+  );
 }

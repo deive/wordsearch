@@ -90,14 +90,14 @@ class App extends StatelessWidget {
     else {
       return MaterialApp(
         title: title,
-        theme: _ThemeMaterialData(!hasDarkTheme),
-        darkTheme: _ThemeMaterialData(true),
+        theme: _themeMaterialData(!hasDarkTheme),
+        darkTheme: _themeMaterialData(true),
         home: home,
       );
     }
   }
 
-  ThemeData _ThemeMaterialData(bool dark) {
+  ThemeData _themeMaterialData(bool dark) {
     if (dark) {
       return ThemeData(
         brightness: Brightness.dark,

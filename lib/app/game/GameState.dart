@@ -16,6 +16,9 @@ class GameState {
   GameState(this.state, this.words, this.puzzle, this.cells);
 
   factory GameState.initial() => GameState(GameStateEnum.Loading, null, null, null);
+  GameState withSelected(WordCell cell) => GameState(GameStateEnum.Selecting, words, puzzle, cells.map((e) => e.map((c) => c == cell ? c.asSelected() : c).toList(growable: false)).toList(growable: false));
+
+  List<WordCell> getSelected() => cells.map((e) => e.map((e) => e.selected ? e : null).where((e) => e != null && e.selected)).expand((e) => e).toList(growable: false);
 }
 
 enum GameStateEnum {
@@ -32,7 +35,18 @@ class WordCell {
   String letter;
   int x;
   int y;
-  WordCell(this.letter, this.x, this.y);
+  bool selected = false;
+  WordCell(this.letter, this.x, this.y, { this.selected = false });
+  WordCell asSelected() => WordCell(this.letter, this.x, this.y, selected: true);
+
+  @override
+  bool operator ==(Object o) => o is WordCell && o.x == x && o.y == y;
+
+  @override
+  int get hashCode => x ^ y;
+
+  bool isNextTo(WordCell o) => (x == o.x-1 || x == o.x || x == o.x+1) && (y == o.y-1 || y == o.y || y == o.y+1);
+
 }
 
 void loadGameMiddleware(Store<AppState> store, action, NextDispatcher next) {
@@ -48,7 +62,58 @@ void loadGameMiddleware(Store<AppState> store, action, NextDispatcher next) {
 
 GameState gameReducer(GameState state, action) {
   if (action is NewGameAction) return newGameReducer(state, action);
-  else return state;
+  else if (action is SelectCellAction) {
+    if (state.state == GameStateEnum.New || state.state == GameStateEnum.Started) {
+      // First letter selected
+      if (state.state == GameStateEnum.New) {
+        // TODO: Dispatch started action, to start a timer or something?
+      }
+      return state.withSelected(action.cell);
+    } else if (state.state == GameStateEnum.Selecting) {
+      // Another letter selected
+      var selected = state.getSelected();
+      if (!selected.contains(action.cell)) {
+        if (selected.length == 1) {
+          // Allow selection in any direction
+          var selectedCell = selected.first;
+          if (action.cell.isNextTo(selectedCell))
+            return state.withSelected(action.cell);
+        }
+        else {
+          // TODO: Only allow selection if in line with current selection...
+          WordCell nextTo, inLineWith;
+          if (action.cell.isNextTo(selected.first)) {
+            nextTo = selected.first;
+            inLineWith = selected[1];
+          } else if (action.cell.isNextTo(selected.last)) {
+            nextTo = selected.last;
+            inLineWith = selected[selected.length - 2];
+          }
+          else {
+            // Not next to the first or last selected, so not in line.
+            return state;
+          }
+
+          if (nextTo.x == inLineWith.x && action.cell.x == nextTo.x) {
+            // Same x, must be different y by 1
+            if (nextTo.y == inLineWith.y - 1 && action.cell.y == nextTo.y - 1) return state.withSelected(action.cell);
+            else if (nextTo.y == inLineWith.y + 1 && action.cell.y == nextTo.y + 1) return state.withSelected(action.cell);
+          } else if (nextTo.y == inLineWith.y && action.cell.y == nextTo.y) {
+            // Same y, must be different x by 1
+            if (nextTo.x == inLineWith.x - 1 && action.cell.x == nextTo.x - 1) return state.withSelected(action.cell);
+            else if (nextTo.x == inLineWith.x + 1 && action.cell.x == nextTo.x + 1) return state.withSelected(action.cell);
+          } else {
+            // Diagonal, check direction
+            if (nextTo.x == inLineWith.x + 1 && nextTo.y == inLineWith.y + 1 && action.cell.x == nextTo.x + 1 && action.cell.y == nextTo.y + 1) return state.withSelected(action.cell);
+            else if (nextTo.x == inLineWith.x + 1 && nextTo.y == inLineWith.y - 1 && action.cell.x == nextTo.x + 1 && action.cell.y == nextTo.y - 1) return state.withSelected(action.cell);
+            else if (nextTo.x == inLineWith.x - 1 && nextTo.y == inLineWith.y + 1 && action.cell.x == nextTo.x - 1 && action.cell.y == nextTo.y + 1) return state.withSelected(action.cell);
+            else if (nextTo.x == inLineWith.x - 1 && nextTo.y == inLineWith.y - 1 && action.cell.x == nextTo.x - 1 && action.cell.y == nextTo.y - 1) return state.withSelected(action.cell);
+          }
+        }
+      }
+    }
+  }
+  return state;
 }
 
 GameState newGameReducer(GameState state, NewGameAction action) {
@@ -66,4 +131,9 @@ class LoadGameAction {}
 class NewGameAction {
   final SettingsState settings;
   NewGameAction(this.settings);
+}
+
+class SelectCellAction {
+  final WordCell cell;
+  SelectCellAction(this.cell);
 }

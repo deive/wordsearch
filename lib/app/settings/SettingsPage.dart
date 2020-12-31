@@ -18,7 +18,20 @@ class SettingsPage extends StatelessWidget {
         return Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: _settingsList(context, viewModel),
+          children: [
+            if (!App.showToolbar) AutoSizeText("Settings", style: TextStyle(fontSize: 50, color: Theme.of(context).primaryColor)),
+            Expanded(child: Center(
+              child: ListView(shrinkWrap: true, children: [
+                _forWordSearchSize(context, viewModel),
+                _forWordsHorizontal(context, viewModel),
+                _forWordsVertical(context, viewModel),
+                _forWordsDiagonal(context, viewModel),
+                _forNumWords(context, viewModel),
+              ]),
+            )),
+            Text("Any changes will take effect for next new game.", style: TextStyle(color: Theme.of(context).primaryColor)),
+          ]
+          //_settingsList(context, viewModel),
         );
       }
   );

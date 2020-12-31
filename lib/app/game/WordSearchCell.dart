@@ -17,9 +17,10 @@ class _WordCellState extends State<WordSearchCell> {
 
   @override
   Widget build(BuildContext context) {
+    Color color = widget.cell.selected ? Color.fromARGB(255, 0, 255, 0) : null;
     return Container(
       constraints: BoxConstraints.expand(),
-      decoration: new BoxDecoration(border: Border.all(color: Theme.of(context).primaryColor)),
+      decoration: new BoxDecoration(border: Border.all(color: Theme.of(context).primaryColor), color: color),
       padding: EdgeInsets.all(widget.size / 10),
       child: FittedBox(
           child: Text(widget.cell.letter,

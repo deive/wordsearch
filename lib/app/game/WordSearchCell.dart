@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../App.dart';
 import 'GameState.dart';
 
 class WordSearchCell extends StatefulWidget {
@@ -17,7 +18,7 @@ class _WordCellState extends State<WordSearchCell> {
 
   @override
   Widget build(BuildContext context) {
-    Color color = widget.cell.selected ? Color.fromARGB(255, 0, 255, 0) : null;
+    Color color = widget.cell.selectedFor != null ? widget.cell.selectedFor.color : widget.cell.selected ? App.selectedColor : null;
     return Container(
       constraints: BoxConstraints.expand(),
       decoration: new BoxDecoration(border: Border.all(color: Theme.of(context).primaryColor), color: color),

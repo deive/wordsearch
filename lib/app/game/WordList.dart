@@ -57,7 +57,10 @@ class WordListWidget extends StatelessWidget {
 
   Widget buildWord(BuildContext context, GameWord word) => Center(child: AutoSizeText(
     word.word,
-    style: TextStyle(fontSize: 50, color: Theme.of(context).primaryColor),
+    style: TextStyle(
+        fontSize: 50,
+        color: word.color,
+        decoration: word.found ? TextDecoration.lineThrough : null),
     textAlign: TextAlign.center,
     maxLines: 1,
   ));

@@ -25,6 +25,21 @@ class App extends StatelessWidget {
   static Color _lightThemeAccentColorColor = Colors.lightBlue[400];
   static Color _darkThemePrimaryColor = Colors.lightBlue[600];
   static Color _darkThemeAccentColorColor = Colors.blue[900];
+  static Color selectedColor = Color.fromARGB(255, 0, 255, 0);
+  static List<Color> wordColors = [
+    Colors.green,
+    Colors.amber,
+    Colors.brown,
+    Colors.deepOrange,
+    Colors.deepPurple,
+    Colors.lime,
+    Colors.greenAccent,
+    Colors.pink,
+    Colors.red,
+    Colors.teal,
+    Colors.orangeAccent,
+    Colors.purpleAccent,
+  ];
 
   static double getScreenViewHeight(MediaQueryData mq) {
     var viewHeight = mq.size.height - mq.padding.top;

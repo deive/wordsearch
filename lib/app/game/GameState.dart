@@ -21,7 +21,7 @@ class GameState {
   // Returns a copy of this state with the given cell selected.
   GameState withSelected(WordCell cell) => GameState(
       GameStateEnum.Selecting, words, puzzle,
-      cells.map((e) => e.map((c) => c == cell ? c.asSelected() : c).toList(growable: false)).toList(growable: false)
+      cells.map((e) => e.map((c) => c == cell ? c.asSelected() : c.asWantedComplete()).toList(growable: false)).toList(growable: false)
   );
   // Returns a copy of this state with the given word marked as found, and all cells unselected
   GameState withFound(WordCell cell, GameWord wordFound) {
@@ -30,7 +30,7 @@ class GameState {
         wordsUpdated.any((e) => !e.found) ? GameStateEnum.Started : GameStateEnum.Complete,
         wordsUpdated,
         puzzle,
-        cells.map((e) => e.map((c) => (c.selected || c == cell) ? c.asSelectedFor(wordFound) : c).toList(growable: false)).toList(growable: false)
+        cells.map((e) => e.map((c) => (c.selected || c == cell) ? c.asSelectedFor(wordFound) : c.asWantedComplete()).toList(growable: false)).toList(growable: false)
     );
   }
  
@@ -62,10 +62,13 @@ class WordCell {
   int y;
   bool selected = false;
   GameWord selectedFor;
-  WordCell(this.letter, this.x, this.y, { this.selected = false, this.selectedFor });
-  WordCell asSelected() => WordCell(this.letter, this.x, this.y, selected: true, selectedFor: null);
-  WordCell asUnselected() => WordCell(this.letter, this.x, this.y, selected: false, selectedFor: null);
-  WordCell asSelectedFor(GameWord selectedFor) => WordCell(this.letter, this.x, this.y, selected: false, selectedFor: selectedFor);
+  Color lastColor;
+  Color wantedColor;
+  WordCell(this.letter, this.x, this.y, { this.selected = false, this.selectedFor, this.lastColor, this.wantedColor });
+  WordCell asSelected() => WordCell(this.letter, this.x, this.y, selected: true, selectedFor: null, lastColor: this.wantedColor, wantedColor: App.selectedColor);
+  WordCell asUnselected() => WordCell(this.letter, this.x, this.y, selected: false, selectedFor: null, lastColor: this.wantedColor, wantedColor: null);
+  WordCell asSelectedFor(GameWord selectedFor) => WordCell(this.letter, this.x, this.y, selected: false, selectedFor: selectedFor, lastColor: this.wantedColor, wantedColor: selectedFor.color);
+  WordCell asWantedComplete() => WordCell(this.letter, this.x, this.y, selected: this.selected, selectedFor: this.selectedFor, lastColor: this.wantedColor, wantedColor: this.wantedColor);
 
   @override
   bool operator ==(Object o) => o is WordCell && o.x == x && o.y == y;

@@ -32,13 +32,15 @@ class WordSearchWidget extends StatelessWidget {
                 )))
             .toList();
         return Listener(
-            onPointerDown: (event) => viewModel.onStartSelecting(_cellForKeyAtLocation(event, keyCells)),
             onPointerMove: (event) => viewModel.onSelecting(_cellForKeyAtLocation(event, keyCells)),
+            onPointerUp: (event) => viewModel.onEndSelecting(_cellForKeyAtLocation(event, keyCells)),
             child: Row(children: columns));
       });
 
-  WordCell _cellForKeyAtLocation(PointerEvent event, Map<GlobalKey, WordCell> keyCells) =>
-      keyCells[keyCells.keys.firstWhere((element) => _getRectFromKey(element).contains(event.position))];
+  WordCell _cellForKeyAtLocation(PointerEvent event, Map<GlobalKey, WordCell> keyCells) {
+    var index = keyCells.keys.firstWhere((element) => _getRectFromKey(element).contains(event.position), orElse: () => null);
+    return index == null ? null : keyCells[index];
+  }
 
   Rect _getRectFromKey(GlobalKey key) {
     var object = key?.currentContext?.findRenderObject();
@@ -56,14 +58,15 @@ class WordSearchWidget extends StatelessWidget {
 
 class _ViewModel {
   List<List<WordCell>> cells;
-  final Function onStartSelecting;
   final Function onSelecting;
+  final Function onEndSelecting;
 
-  _ViewModel(this.cells, this.onStartSelecting, this.onSelecting);
+  _ViewModel(this.cells, this.onSelecting, this.onEndSelecting);
 
   factory _ViewModel.create(Store<AppState> store) =>
       _ViewModel(store.state.game.cells,
             (cell) => store.dispatch(SelectCellAction(cell)),
-            (cell) => store.dispatch(SelectCellAction(cell)),
+            (cell) => store.dispatch(CompleteSelectingCellAction(cell)),
       );
+
 }

@@ -30,7 +30,7 @@ class App extends StatelessWidget {
     Colors.green,
     Colors.amber,
     Colors.brown,
-    Colors.deepOrange,
+    Colors.lightGreenAccent,
     Colors.deepPurple,
     Colors.lime,
     Colors.greenAccent,

@@ -33,6 +33,16 @@ class GameState {
         cells.map((e) => e.map((c) => (c.selected || c == cell) ? c.asSelectedFor(wordFound) : c.asWantedComplete()).toList(growable: false)).toList(growable: false)
     );
   }
+  // Returns a copy of this state with all cells unselected.
+  GameState withAllUnselected() => GameState(
+      GameStateEnum.Started, words, puzzle,
+      cells.map((e) => e.map((c) => c.selected ? c.asUnselected() : c).toList(growable: false)).toList(growable: false)
+  );
+  // Returns a copy of this state with the given cell last color marked the same as wanted color.
+  GameState withWantedComplete(WordCell cell) => GameState(
+      state, words, puzzle,
+      cells.map((e) => e.map((c) => c == cell ? c.asWantedComplete() : c).toList(growable: false)).toList(growable: false)
+  );
  
   List<WordCell> getSelected() => cells.map((e) => e.map((e) => e.selected ? e : null).where((e) => e != null && e.selected)).expand((e) => e).toList(growable: false);
   List<GameWord> getAvailableWords() => words.where((e) => !e.found).toList(growable: false);
@@ -65,8 +75,8 @@ class WordCell {
   Color lastColor;
   Color wantedColor;
   WordCell(this.letter, this.x, this.y, { this.selected = false, this.selectedFor, this.lastColor, this.wantedColor });
-  WordCell asSelected() => WordCell(this.letter, this.x, this.y, selected: true, selectedFor: null, lastColor: this.wantedColor, wantedColor: App.selectedColor);
-  WordCell asUnselected() => WordCell(this.letter, this.x, this.y, selected: false, selectedFor: null, lastColor: this.wantedColor, wantedColor: null);
+  WordCell asSelected() => WordCell(this.letter, this.x, this.y, selected: true, selectedFor: this.selectedFor, lastColor: this.wantedColor, wantedColor: App.selectedColor);
+  WordCell asUnselected() => WordCell(this.letter, this.x, this.y, selected: false, selectedFor: this.selectedFor, lastColor: this.wantedColor, wantedColor: selectedFor == null ? null : selectedFor.color);
   WordCell asSelectedFor(GameWord selectedFor) => WordCell(this.letter, this.x, this.y, selected: false, selectedFor: selectedFor, lastColor: this.wantedColor, wantedColor: selectedFor.color);
   WordCell asWantedComplete() => WordCell(this.letter, this.x, this.y, selected: this.selected, selectedFor: this.selectedFor, lastColor: this.wantedColor, wantedColor: this.wantedColor);
 
@@ -92,9 +102,49 @@ void loadGameMiddleware(Store<AppState> store, action, NextDispatcher next) {
 }
 
 GameState gameReducer(GameState state, action) {
-  if (action is NewGameAction) return newGameReducer(state, action);
-  else if (action is SelectCellAction) {
-    if (state.state == GameStateEnum.New || state.state == GameStateEnum.Started) {
+  if (action is NewGameAction) return _newGameReducer(state, action);
+  else if (action is SelectCellAction) return _selectCellReducer(state, action);
+  else if (action is CellAnimationCompleteAction) return _cellAnimationCompleteReducer(state, action);
+  else if (action is CompleteSelectingCellAction) return _completeSelectingReducer(state, action);
+  else return state;
+}
+
+GameState _completeSelectingReducer(GameState state, CompleteSelectingCellAction action) {
+  if (action.cell != null && state.state == GameStateEnum.Selecting) {
+    // Check if word is found
+    var selected = state.getSelected();
+    var wordF = selected.map((e) => e.letter).join("");
+    var wordR = selected.reversed.map((e) => e.letter).join("");
+    var words = state.getAvailableWords();
+    var foundIndex = words.indexWhere((e) => e.word == wordF);
+    if (foundIndex == -1) foundIndex = words.indexWhere((e) => e.word == wordR);
+    GameWord foundWord;
+    if (foundIndex > -1) {
+      foundWord = words[foundIndex];
+      return state.withFound(action.cell, foundWord);
+    }
+    else {
+      return state.withAllUnselected();
+    }
+  }
+  return state;
+}
+
+GameState _newGameReducer(GameState state, NewGameAction action) {
+  var colours = _shuffleList(App.wordColors);
+  var words = App.pickRandomWords(action.settings.numWords, action.settings.size).asMap().map((index, e) => MapEntry(index, GameWord(e, false, colours[index]))).values.toList(growable: false);
+  var puzzle = App.wordSearch.newPuzzle(words.map((e) => e.word).toList(), action.settings.wordSettings);
+  var cells = puzzle.puzzle.asMap().entries.map((entry) =>
+      entry.value.asMap().entries.map((innerEntry) =>
+          WordCell(innerEntry.value, entry.key, innerEntry.key)
+      ).toList(growable: false)).toList(growable: false);
+  return GameState(GameStateEnum.New, words, puzzle, cells);
+}
+
+GameState _selectCellReducer(GameState state, SelectCellAction action) {
+  if (action.cell != null) {
+    if (state.state == GameStateEnum.New ||
+        state.state == GameStateEnum.Started) {
       // First letter selected
       if (state.state == GameStateEnum.New) {
         // TODO: Dispatch started action, to start a timer or something?
@@ -116,19 +166,7 @@ GameState gameReducer(GameState state, action) {
         }
 
         if (isSelected) {
-          // Check if word is found
-          var wordF = selected.map((e) => e.letter).join("") + action.cell.letter;
-          var wordR = selected.reversed.map((e) => e.letter).join("") + action.cell.letter;
-          var words = state.getAvailableWords();
-          var foundIndex = words.indexWhere((e) => e.word == wordF);
-          if (foundIndex == -1) foundIndex = words.indexWhere((e) => e.word == wordR);
-          GameWord foundWord;
-          if (foundIndex > -1) {
-            foundWord = words[foundIndex];
-            return state.withFound(action.cell, foundWord);
-          } else {
-            return state.withSelected(action.cell);
-          }
+          return state.withSelected(action.cell);
         }
       }
     }
@@ -136,15 +174,11 @@ GameState gameReducer(GameState state, action) {
   return state;
 }
 
-GameState newGameReducer(GameState state, NewGameAction action) {
-  var colours = _shuffleList(App.wordColors);
-  var words = App.pickRandomWords(action.settings.numWords, action.settings.size).asMap().map((index, e) => MapEntry(index, GameWord(e, false, colours[index]))).values.toList(growable: false);
-  var puzzle = App.wordSearch.newPuzzle(words.map((e) => e.word).toList(), action.settings.wordSettings);
-  var cells = puzzle.puzzle.asMap().entries.map((entry) =>
-      entry.value.asMap().entries.map((innerEntry) =>
-          WordCell(innerEntry.value, entry.key, innerEntry.key)
-      ).toList(growable: false)).toList(growable: false);
-  return GameState(GameStateEnum.New, words, puzzle, cells);
+GameState _cellAnimationCompleteReducer(GameState state, CellAnimationCompleteAction action) {
+  if (action.cell != null) {
+    return state.withWantedComplete(action.cell);
+  }
+  return state;
 }
 
 class LoadGameAction {}
@@ -154,9 +188,21 @@ class NewGameAction {
   NewGameAction(this.settings);
 }
 
-class SelectCellAction {
+abstract class CellAction {
   final WordCell cell;
-  SelectCellAction(this.cell);
+  CellAction(this.cell);
+}
+
+class SelectCellAction extends CellAction {
+  SelectCellAction(WordCell cell) : super(cell);
+}
+
+class CellAnimationCompleteAction extends CellAction {
+  CellAnimationCompleteAction(WordCell cell) : super(cell);
+}
+
+class CompleteSelectingCellAction extends CellAction {
+  CompleteSelectingCellAction(WordCell cell) : super(cell);
 }
 
 bool _canSelectCell(GameState state, SelectCellAction action, List<WordCell> selected) {

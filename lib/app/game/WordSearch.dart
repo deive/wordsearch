@@ -13,7 +13,6 @@ class WordSearchWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => StoreConnector<AppState, _ViewModel>(
-      distinct: true,
       converter: (Store<AppState> store) => _ViewModel.create(store),
       builder: (BuildContext context, _ViewModel viewModel) {
         Map<GlobalKey, WordCell> keyCells = {};
@@ -32,20 +31,27 @@ class WordSearchWidget extends StatelessWidget {
                 )))
             .toList();
         return Listener(
-            onPointerMove: (event) => viewModel.onSelecting(_cellForKeyAtLocation(event, keyCells)),
-            onPointerUp: (event) => viewModel.onEndSelecting(_cellForKeyAtLocation(event, keyCells)),
+            onPointerMove: (event) => viewModel.onSelecting(_cellForKeyAtLocation(viewModel, event, keyCells)),
+            onPointerUp: (event) => viewModel.onEndSelecting(_cellForKeyAtLocation(viewModel, event, keyCells)),
+            onPointerCancel: (event) => viewModel.onEndSelecting(_cellForKeyAtLocation(viewModel, event, keyCells)),
             child: Row(children: columns));
       });
 
-  WordCell _cellForKeyAtLocation(PointerEvent event, Map<GlobalKey, WordCell> keyCells) {
-    var index = keyCells.keys.firstWhere((element) => _getRectFromKey(element).contains(event.position), orElse: () => null);
-    return index == null ? null : keyCells[index];
+  WordCell _cellForKeyAtLocation(_ViewModel viewModel, PointerEvent event, Map<GlobalKey, WordCell> keyCells) {
+    final key = keyCells.keys.firstWhere((element) => _getRectFromKey(element).contains(event.position), orElse: () => null);
+    if (key != null && viewModel.state == GameStateEnum.Selecting) {
+      // If we are already selecting, then we take a smaller circle around the cell.
+      final rect = _getRectFromKey(key);
+      final distance = (rect.center - event.position).distance;
+      return distance < (rect.width / 2) ? keyCells[key] : null;
+    }
+    else return key == null ? null : keyCells[key];
   }
 
   Rect _getRectFromKey(GlobalKey key) {
-    var object = key?.currentContext?.findRenderObject();
-    var translation = object?.getTransformTo(null)?.getTranslation();
-    var size = object?.semanticBounds?.size;
+    final object = key?.currentContext?.findRenderObject();
+    final translation = object?.getTransformTo(null)?.getTranslation();
+    final size = object?.semanticBounds?.size;
 
     if (translation != null && size != null) {
       return new Rect.fromLTWH(
@@ -57,14 +63,16 @@ class WordSearchWidget extends StatelessWidget {
 }
 
 class _ViewModel {
-  List<List<WordCell>> cells;
+  final GameStateEnum state;
+  final List<List<WordCell>> cells;
   final Function onSelecting;
   final Function onEndSelecting;
 
-  _ViewModel(this.cells, this.onSelecting, this.onEndSelecting);
+  _ViewModel(this.state, this.cells, this.onSelecting, this.onEndSelecting);
 
   factory _ViewModel.create(Store<AppState> store) =>
-      _ViewModel(store.state.game.cells,
+      _ViewModel(store.state.game.state,
+            store.state.game.cells,
             (cell) => store.dispatch(SelectCellAction(cell)),
             (cell) => store.dispatch(CompleteSelectingCellAction(cell)),
       );

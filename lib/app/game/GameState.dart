@@ -15,35 +15,49 @@ class GameState {
   final List<GameWord> words;
   final WSNewPuzzle puzzle;
   final List<List<WordCell>> cells;
-  GameState(this.state, this.words, this.puzzle, this.cells);
+  final DateTime gameStartTime;
+  final Duration gameCompleteTime;
+  final int selections;
+  GameState(this.state, this.words, this.puzzle, this.cells, this.gameStartTime, this.gameCompleteTime, this.selections);
 
-  factory GameState.initial() => GameState(GameStateEnum.Loading, null, null, null);
+  factory GameState.initial() => GameState(GameStateEnum.Loading, null, null, null, null, null, 0);
+  factory GameState.newGame(words, puzzle, cells) => GameState(GameStateEnum.New, words, puzzle, cells, null, null, 0);
   // Returns a copy of this state with the given cell selected.
-  GameState withSelected(WordCell cell) => GameState(
+  GameState withSelected(WordCell cell) {
+    final startTime = gameStartTime == null ? DateTime.now() : gameStartTime;
+    return GameState(
       GameStateEnum.Selecting, words, puzzle,
-      cells.map((e) => e.map((c) => c == cell ? c.asSelected() : c.asWantedComplete()).toList(growable: false)).toList(growable: false)
-  );
+      cells.map((e) => e.map((c) => c == cell ? c.asSelected() : c.asWantedComplete()).toList(growable: false)).toList(growable: false),
+        startTime, null, selections
+    );
+  }
   // Returns a copy of this state with the given word marked as found, and all cells unselected
   GameState withFound(WordCell cell, GameWord wordFound) {
-    var wordsUpdated = words.map((e) => e == wordFound ? e.asFound() : e).toList(growable: false);
+    final wordsUpdated = words.map((e) => e == wordFound ? e.asFound() : e).toList(growable: false);
+    final state = wordsUpdated.any((e) => !e.found) ? GameStateEnum.Started : GameStateEnum.Complete;
     return GameState(
-        wordsUpdated.any((e) => !e.found) ? GameStateEnum.Started : GameStateEnum.Complete,
+        state,
         wordsUpdated,
         puzzle,
-        cells.map((e) => e.map((c) => (c.selected || c == cell) ? c.asSelectedFor(wordFound) : c.asWantedComplete()).toList(growable: false)).toList(growable: false)
+        cells.map((e) => e.map((c) => (c.selected || c == cell) ? c.asSelectedFor(wordFound) : c.asWantedComplete()).toList(growable: false)).toList(growable: false),
+        gameStartTime,
+        state == GameStateEnum.Complete ? DateTime.now().difference(gameStartTime) : null,
+        selections + 1
     );
   }
   // Returns a copy of this state with all cells unselected.
   GameState withAllUnselected() => GameState(
       GameStateEnum.Started, words, puzzle,
-      cells.map((e) => e.map((c) => c.selected ? c.asUnselected() : c).toList(growable: false)).toList(growable: false)
+      cells.map((e) => e.map((c) => c.selected ? c.asUnselected() : c).toList(growable: false)).toList(growable: false),
+      gameStartTime, null, selections + 1
   );
   // Returns a copy of this state with the given cell last color marked the same as wanted color.
   GameState withWantedComplete(WordCell cell) => GameState(
       state, words, puzzle,
-      cells.map((e) => e.map((c) => c == cell ? c.asWantedComplete() : c).toList(growable: false)).toList(growable: false)
+      cells.map((e) => e.map((c) => c == cell ? c.asWantedComplete() : c).toList(growable: false)).toList(growable: false),
+      gameStartTime, gameCompleteTime, selections
   );
- 
+
   List<WordCell> getSelected() => cells.map((e) => e.map((e) => e.selected ? e : null).where((e) => e != null && e.selected)).expand((e) => e).toList(growable: false);
   List<GameWord> getAvailableWords() => words.where((e) => !e.found).toList(growable: false);
 }
@@ -138,7 +152,7 @@ GameState _newGameReducer(GameState state, NewGameAction action) {
       entry.value.asMap().entries.map((innerEntry) =>
           WordCell(innerEntry.value, entry.key, innerEntry.key)
       ).toList(growable: false)).toList(growable: false);
-  return GameState(GameStateEnum.New, words, puzzle, cells);
+  return GameState.newGame(words, puzzle, cells);
 }
 
 GameState _selectCellReducer(GameState state, SelectCellAction action) {

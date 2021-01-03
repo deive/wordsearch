@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
+import 'package:wordsearch/app/game/GameInfo.dart';
 
 import '../App.dart';
 import '../AppState.dart';
 import 'GameState.dart';
 
 class WordListWidget extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) => StoreConnector<AppState, _ViewModel>(
       distinct: true,
@@ -26,7 +28,9 @@ class WordListWidget extends StatelessWidget {
         if (App.isCupertino)
           CupertinoButton(child: Icon(CupertinoIcons.restart), onPressed: viewModel.onRestartGame)
         else
-          IconButton(icon: Icon(Icons.refresh), onPressed: viewModel.onRestartGame)
+          IconButton(icon: Icon(Icons.refresh), onPressed: viewModel.onRestartGame),
+        Positioned(top: 10, left: 10, child: GameSelections()),
+        Positioned(top: 10, right: 10, child: GameTime()),
       ],
     );
   }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
-import 'package:wordsearch/app/AppState.dart';
 
+import '../AppState.dart';
 import 'GameState.dart';
 
 class WordSearchCell extends StatelessWidget {
